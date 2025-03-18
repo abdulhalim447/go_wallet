@@ -1,0 +1,2 @@
+D:/clients_projects/go_wallet/android/app/.cxx/Debug/1dv5h2y6/x86/CMakeFiles/edit_cache.dir
+D:/clients_projects/go_wallet/android/app/.cxx/Debug/1dv5h2y6/x86/CMakeFiles/rebuild_cache.dir

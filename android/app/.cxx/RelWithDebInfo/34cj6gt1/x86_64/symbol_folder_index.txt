@@ -1,0 +1,1 @@
+D:\clients_projects\go_wallet\build\app\intermediates\cxx\RelWithDebInfo\34cj6gt1\obj\x86_64
