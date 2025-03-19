@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:go_wallet/models/user_session.dart';
+import 'dart:convert';
+import 'package:go_wallet/models/payment_numbers_manager.dart';
+import 'package:flutter/services.dart';
 
 class AddMoneyScreen extends StatefulWidget {
   const AddMoneyScreen({Key? key}) : super(key: key);
@@ -19,12 +24,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _pinController = TextEditingController();
 
-  final Map<String, String> paymentMethods = {
-    'Bkash': '00',
-    'Nagad': '00',
-    'Rocket': '00',
-    'Upay': '00',
-  };
+  @override
+  void initState() {
+    super.initState();
+    PaymentNumbersManager().refreshNumbers();
+  }
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -35,21 +39,169 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     }
   }
 
-  void _submitForm() async {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      if (_image == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please upload a receipt image')),
+        );
+        return;
+      }
+
       setState(() => _isLoading = true);
 
-      // TODO: Implement API call here
-      // final response = await YourApiService.submitPayment(
-      //   trnxId: _trnxIdController.text,
-      //   amount: _amountController.text,
-      //   pin: _pinController.text,
-      //   image: _image,
-      // );
+      try {
+        // Get user ID from session
+        final userId = await UserSession.getUserId();
 
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
-      setState(() => _isLoading = false);
+        // Create multipart request
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse('https://gowalletapp.com/php/add_money/add_money.php'),
+        );
+
+        // Add text fields
+        request.fields['account'] = userId;
+        request.fields['transaction_id'] = _trnxIdController.text;
+        request.fields['amount'] = _amountController.text;
+
+        // Add image file
+        var imageStream = http.ByteStream(_image!.openRead());
+        var length = await _image!.length();
+
+        if (length > 2097152) {
+          // 2MB in bytes
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image size should be less than 2MB')),
+          );
+          setState(() => _isLoading = false);
+          return;
+        }
+
+        var multipartFile = http.MultipartFile(
+          'image',
+          imageStream,
+          length,
+          filename: _image!.path.split('/').last,
+        );
+
+        request.files.add(multipartFile);
+
+        // Send request
+        var response = await request.send();
+        var responseData = await response.stream.bytesToString();
+        var jsonResponse = json.decode(responseData);
+
+        if (response.statusCode == 200 && jsonResponse['status'] == 'success') {
+          if (!mounted) return;
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(jsonResponse['message'])),
+          );
+
+          // Clear form
+          _trnxIdController.clear();
+          _amountController.clear();
+          _pinController.clear();
+          setState(() {
+            _image = null;
+          });
+
+          // Navigate back
+          Navigator.pop(context);
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(jsonResponse['message'] ?? 'Failed to add money')),
+          );
+        }
+      } catch (e) {
+        print(e);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+        print('Error during add money: $e');
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
+  }
+
+  Widget _buildPaymentMethods() {
+    return StreamBuilder<Map<String, String>>(
+      stream: PaymentNumbersManager().numbersStream,
+      builder: (context, snapshot) {
+        final numbers = snapshot.data ?? PaymentNumbersManager().currentNumbers;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: ['Bkash', 'Nagad', 'Rocket', 'Upay'].map((method) {
+              final number = numbers[method.toLowerCase()] ?? '';
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/${method.toLowerCase()}.png',
+                      width: 32,
+                      height: 32,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.payment),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '$method: $number',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (number.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 20),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: number));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('$method number copied!'),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        tooltip: 'Copy number',
+                        splashRadius: 20,
+                        color: Colors.blue,
+                      ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -90,47 +242,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 const SizedBox(height: 24),
 
                 // Payment Methods
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: paymentMethods.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/${entry.key.toLowerCase()}.png',
-                              width: 32,
-                              height: 32,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.payment),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '${entry.key}: ${entry.value}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                _buildPaymentMethods(),
 
                 const SizedBox(height: 24),
 

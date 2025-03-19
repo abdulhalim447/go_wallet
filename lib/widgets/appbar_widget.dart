@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../models/user_session.dart';
 import 'offeres_widget.dart';
+import 'package:go_wallet/models/balance_manager.dart';
 
 class AppBarWidget extends StatefulWidget {
   const AppBarWidget({
@@ -28,7 +29,6 @@ class AppBarWidgetState extends State<AppBarWidget> {
   bool _isAnimation = false;
   bool _isBalanceShown = false;
   bool _isBalance = true;
-
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -72,7 +72,7 @@ class AppBarWidgetState extends State<AppBarWidget> {
                           radius: 40,
                           backgroundImage: NetworkImage(snapshot.data!),
                           onBackgroundImageError: (_, __) =>
-                          const Icon(Icons.person, size: 40),
+                              const Icon(Icons.person, size: 40),
                         );
                       }
                     },
@@ -93,14 +93,12 @@ class AppBarWidgetState extends State<AppBarWidget> {
                             return Text(
                               snapshot.data ?? '',
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                              ),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             );
                           },
                         ),
-
                         SizedBox(width: 5),
                         FutureBuilder<String>(
                           future: UserSession.getUserId(),
@@ -108,20 +106,14 @@ class AppBarWidgetState extends State<AppBarWidget> {
                             return Text(
                               snapshot.data ?? '',
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                              ),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             );
                           },
                         ),
-
-
-
-
                       ],
                     ),
-
 
                     SizedBox(
                       height: 5,
@@ -142,9 +134,18 @@ class AppBarWidgetState extends State<AppBarWidget> {
                               AnimatedOpacity(
                                   opacity: _isBalanceShown ? 1 : 0,
                                   duration: Duration(milliseconds: 500),
-                                  child: Text('৳ 8100.25',
-                                      style: TextStyle(
-                                          color: Colors.blue, fontSize: 14))),
+                                  child: StreamBuilder<String>(
+                                    stream: BalanceManager().balanceStream,
+                                    builder: (context, snapshot) {
+                                      return Text(
+                                        '৳ ${BalanceManager().getFormattedBalance()}',
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 14,
+                                        ),
+                                      );
+                                    },
+                                  )),
 
                               //Balance
                               AnimatedOpacity(
@@ -164,7 +165,6 @@ class AppBarWidgetState extends State<AppBarWidget> {
                                   child: Container(
                                       height: 20,
                                       width: 20,
-                                      // padding: const EdgeInsets.only(bottom: 4),
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                           color: Colors.blue,
