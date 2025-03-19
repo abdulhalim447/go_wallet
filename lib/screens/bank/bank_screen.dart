@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_wallet/models/user_session.dart';
+import 'package:go_wallet/services/bank_transfer_service.dart';
 
 class BankTransferScreen extends StatefulWidget {
   const BankTransferScreen({super.key});
@@ -41,15 +43,60 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
     super.dispose();
   }
 
-  void _handleTransfer() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement transfer logic
+  void _handleTransfer() async {
+    final String? userIdString = await UserSession.getUserId();
+    if (userIdString == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Transfer initiated successfully'),
-          backgroundColor: Colors.green,
+          content: Text('User ID is not available'),
+          backgroundColor: Colors.red,
         ),
       );
+      return;
+    }
+
+    final int userId = int.tryParse(userIdString) ?? -1;
+    if (userId == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid User ID'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final response = await BankTransferService.submitBankTransfer(
+          userId: userId,
+          selectedBank: selectedBank!,
+          accountNumber: _accountNumberController.text,
+          amount: double.parse(_amountController.text),
+        );
+
+        // Clear fields on success
+        _accountHolderController.clear();
+        _accountNumberController.clear();
+        _amountController.clear();
+        setState(() {
+          selectedBank = null;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

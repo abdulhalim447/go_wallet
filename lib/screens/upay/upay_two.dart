@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_wallet/services/mobile_banking_service.dart';
 
 class UpayTwoScreen extends StatefulWidget {
   final String phoneNumber;
@@ -16,6 +17,71 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isCashOut = false;
+  bool _isLoading = false;
+
+  Future<void> _submitTransaction() async {
+    if (_amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter amount')),
+      );
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter password')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final amount = double.parse(_amountController.text);
+      final result = await MobileBankingService.submitTransaction(
+        operator: 'Upay',
+        type: _isCashOut ? 'Cash Out' : 'Send Money',
+        number: widget.phoneNumber,
+        balance: amount,
+      );
+
+      if (!mounted) return;
+
+      if (result['success']) {
+        // Clear fields on success
+        _amountController.clear();
+        _passwordController.clear();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate back
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid amount'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +89,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor:  Colors.blue,
+        backgroundColor: Colors.blue,
         title: const Text(
           'Upay',
           style: TextStyle(
@@ -43,7 +109,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color:  Colors.blue,
+                color: Colors.blue,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
@@ -75,7 +141,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                     ),
                     child: Center(
                       child: Image.asset(
-                          'assets/icons/upay.png',
+                        'assets/icons/upay.png',
                         width: 50,
                         height: 50,
                         errorBuilder: (context, error, stackTrace) =>
@@ -137,7 +203,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
                                 color: _isCashOut
-                                    ?  Colors.blue
+                                    ? Colors.blue
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -161,7 +227,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
                                 color: !_isCashOut
-                                    ?  Colors.blue
+                                    ? Colors.blue
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -203,7 +269,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                         hintText: 'Amount',
                         prefixIcon: Icon(
                           Icons.attach_money,
-                          color:  Colors.blue,
+                          color: Colors.blue,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -236,7 +302,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                         hintText: 'Password',
                         prefixIcon: Icon(
                           Icons.lock_outline,
-                          color:  Colors.blue,
+                          color: Colors.blue,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -265,7 +331,7 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color:  Colors.blue.withOpacity(0.3),
+                          color: Colors.blue.withOpacity(0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -275,19 +341,20 @@ class _UpayTwoScreenState extends State<UpayTwoScreen> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(15),
-                        onTap: () {
-                          // TODO: Implement transaction logic
-                        },
-                        child: const Center(
-                          child: Text(
-                            'SEND NOW',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
+                        onTap: _isLoading ? null : _submitTransaction,
+                        child: Center(
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
+                              : const Text(
+                                  'SEND NOW',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

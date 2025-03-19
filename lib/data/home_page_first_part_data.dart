@@ -73,12 +73,16 @@ var menuodel = [
       Text('Report')
     ],
   ),
-  Column(
+
+
+/*  Column(
     children: [
       Container(
         child: Image.asset('assets/icons/history.png',height: 45,),
       ),
       Text('History')
     ],
-  ),
+  ),*/
+
+
 ];

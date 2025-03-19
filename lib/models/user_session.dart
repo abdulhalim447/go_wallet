@@ -70,6 +70,27 @@ class UserSession {
     return prefs.getBool(_keyIsLoggedIn) ?? false;
   }
 
+  // Individual setters for each field
+  static Future<void> setName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyName, name);
+  }
+
+  static Future<void> setEmail(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyEmail, email);
+  }
+
+  static Future<void> setPhone(String phone) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyPhone, phone);
+  }
+
+  static Future<void> setProfileImage(String imageUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyProfileImage, imageUrl);
+  }
+
   // Clear session
   static Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();

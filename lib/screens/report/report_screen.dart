@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_wallet/services/support_service.dart';
+import 'package:go_wallet/models/user_session.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -36,15 +39,72 @@ class _ReportScreenState extends State<ReportScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement report submission logic
+  void _handleSubmit() async {
+    final String? userIdString = await UserSession.getUserId();
+    if (userIdString == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Report submitted successfully'),
-          backgroundColor: Colors.green,
+          content: Text('User ID is not available'),
+          backgroundColor: Colors.red,
         ),
       );
+      return;
+    }
+
+    final int userId = int.tryParse(userIdString) ?? -1;
+    if (userId == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid User ID'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final response = await SupportService.submitSupportRequest(
+          userId: userId,
+          category: _selectedCategory!,
+          title: _titleController.text,
+          description: _descriptionController.text,
+          email: _emailController.text,
+          urgency: _isUrgent,
+        );
+
+        // Clear fields on success
+        _titleController.clear();
+        _descriptionController.clear();
+        _emailController.clear();
+        setState(() {
+          _selectedCategory = null;
+          _isUrgent = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        print(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
@@ -253,6 +313,24 @@ class _ReportScreenState extends State<ReportScreen> {
                     'Submit Report',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.phone, color: _primaryBlue),
+                      onPressed: () => _launchURL('tel:+1234567890'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.message, color: _primaryBlue),
+                      onPressed: () => _launchURL('https://wa.me/1234567890'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.email, color: _primaryBlue),
+                      onPressed: () => _launchURL('mailto:support@example.com'),
+                    ),
+                  ],
                 ),
               ],
             ),

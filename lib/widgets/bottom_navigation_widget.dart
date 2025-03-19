@@ -42,7 +42,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
               color: Colors.blue,
             ),
           ),
-          text: "Scan QR"),
+          text: "History"),
       activeColor: Colors.blue,
       inActiveColor: Colors.black45,
       appBarItems: [
@@ -77,7 +77,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ],
       actionBarView: Container(
         height: MediaQuery.of(context).size.height,
-        color: Colors.orange,
+        color: Colors.blue,
+        child: Center(child: Text('No history found')),
       ),
     );
   }

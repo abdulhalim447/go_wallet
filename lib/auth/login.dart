@@ -105,7 +105,7 @@ class _LoginState extends State<Login> {
             children: [
               const SizedBox(height: 40),
               Image.asset(
-                'assets/logo.png',
+                'assets/icons/go_wallet.png',
                 height: 120,
                 width: 120,
               ),

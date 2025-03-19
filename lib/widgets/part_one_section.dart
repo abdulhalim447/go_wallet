@@ -12,6 +12,7 @@ import 'package:go_wallet/screens/rocket/rocket.dart';
 import 'package:go_wallet/screens/upay/upay.dart';
 
 import '../data/home_page_first_part_data.dart';
+import '../screens/reffer/reffer.dart';
 
 class PartOneHome extends StatefulWidget {
   const PartOneHome({Key? key}) : super(key: key);
@@ -86,10 +87,10 @@ class _PartOneHomeState extends State<PartOneHome> {
                             MaterialPageRoute(builder: (context) => AddMoneyScreen()),
                           );
                         } else if (index == 1) {
-                         /* Navigator.push(
+                          Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => InboxPage()),
-                          );*/
+                            MaterialPageRoute(builder: (context) => ReferScreen()),
+                          );
 
 
                         } else if (index == 2) {
@@ -125,13 +126,13 @@ class _PartOneHomeState extends State<PartOneHome> {
                             context,
                             MaterialPageRoute(builder: (context) => ReportScreen()),
                           );
-                        } else if (index == 8) {
+                        } /*else if (index == 8) {
                           // Add the screen for 'History'
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => HistoryScreen()),
                           );
-                        }
+                        }*/
                       },
                       child: Container(
                         child: menuodel[index],
