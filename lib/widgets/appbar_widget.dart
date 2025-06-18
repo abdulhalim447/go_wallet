@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import '../models/user_session.dart';
 import 'offeres_widget.dart';
 import 'package:go_wallet/models/balance_manager.dart';
+import 'package:go_wallet/widgets/notice_banner.dart';
 
 class AppBarWidget extends StatefulWidget {
   const AppBarWidget({
@@ -197,15 +198,16 @@ class AppBarWidgetState extends State<AppBarWidget> {
           ),
         ],
       ),
-      endDrawer: DrawerWidget(),
+      // endDrawer: DrawerWidget(),
       body: ListView(
         children: [
           PartOneHome(),
           SizedBox(height: 9),
+          NoticeBanner(),
+          SizedBox(height: 9),
           MyBkashWidget(),
           SizedBox(height: 3),
-          BannerWidget(),
-          SizedBox(height: 9),
+
           /*SuggestionWidget(),
           OffersWidget(),
           MoreSectionWidtget(),

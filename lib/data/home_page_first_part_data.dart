@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 
 var menuodel = [
-  Expanded(
-    child: Column(
-      children: [
-        Container(
-          child: Image.asset('assets/add_money.jpg'),
+  Column(
+    children: [
+      SizedBox(
+        width: 45,
+        height: 45,
+        child: Image.asset(
+          'assets/icons/add_money.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            print('Error loading add money icon: $error');
+            return Icon(Icons.add_circle_outline, size: 45, color: Colors.blue);
+          },
         ),
-        Text('Add')
-      ],
-    ),
+      ),
+      Text('Add')
+    ],
   ),
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/reffer.png', height: 47,),
+        child: Image.asset(
+          'assets/icons/reffer.png',
+          height: 47,
+        ),
       ),
       Text(
         'Reffer',
@@ -24,7 +34,11 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/logo.png', color: Colors.redAccent,height: 45,),
+        child: Image.asset(
+          'assets/logo.png',
+          color: Colors.redAccent,
+          height: 45,
+        ),
       ),
       Text(
         'Bkash',
@@ -34,7 +48,10 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/nagad.png', height: 45,),
+        child: Image.asset(
+          'assets/icons/nagad.png',
+          height: 45,
+        ),
       ),
       Text(
         'Nagad',
@@ -44,7 +61,10 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/rocket.png',height: 45,),
+        child: Image.asset(
+          'assets/icons/rocket.png',
+          height: 45,
+        ),
       ),
       Text('Rocket')
     ],
@@ -52,7 +72,7 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/upay.png',height: 45),
+        child: Image.asset('assets/icons/upay.png', height: 45),
       ),
       Text('Upay')
     ],
@@ -60,7 +80,7 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/bank.png',height: 45),
+        child: Image.asset('assets/icons/bank.png', height: 45),
       ),
       Text('Bank')
     ],
@@ -68,12 +88,14 @@ var menuodel = [
   Column(
     children: [
       Container(
-        child: Image.asset('assets/icons/report.png',height: 50,),
+        child: Image.asset(
+          'assets/icons/report.png',
+          height: 50,
+        ),
       ),
       Text('Report')
     ],
   ),
-
 
 /*  Column(
     children: [
@@ -83,6 +105,4 @@ var menuodel = [
       Text('History')
     ],
   ),*/
-
-
 ];

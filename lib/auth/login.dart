@@ -30,7 +30,7 @@ class _LoginState extends State<Login> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://gowalletapp.com/php/login.php'),
+        Uri.parse('https://gowalletapp.xyz/php/login.php'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

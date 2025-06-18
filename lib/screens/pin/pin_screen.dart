@@ -104,7 +104,7 @@ class _PinScreenState extends State<PinScreen> {
           height: 8,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: index < _pin.length ? Colors.pink : Colors.grey.shade300,
+            color: index < _pin.length ? Colors.blue : Colors.grey.shade300,
           ),
         );
       }),
@@ -221,7 +221,7 @@ class _PinScreenState extends State<PinScreen> {
                 onPressed: _pin.length == _pinLength ? () {} : null,
                 style: TextButton.styleFrom(
                   backgroundColor: _pin.length == _pinLength
-                      ? Colors.pink
+                      ? Colors.blue
                       : Colors.grey.shade300,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

@@ -52,7 +52,7 @@ class _RegistrationState extends State<Registration> {
   }) async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('https://gowalletapp.com/php/register.php'),
+      Uri.parse('https://gowalletapp.xyz/php/register.php'),
     );
 
     request.fields['name'] = name;
@@ -89,8 +89,7 @@ class _RegistrationState extends State<Registration> {
         final referralCode = jsonResponse['reffer'];
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                'Registration successful!'),
+            content: Text('Registration successful!'),
             duration: const Duration(seconds: 5),
           ),
         );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_wallet/models/user_session.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_wallet/services/profile_service.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -11,12 +12,9 @@ class ProfileEditScreen extends StatefulWidget {
 }
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _dobController = TextEditingController();
 
   final _primaryBlue = const Color(0xFF2196F3);
   final _lightBlue = const Color(0xFFE3F2FD);
@@ -39,9 +37,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       _emailController.text = await UserSession.getEmail() ?? '';
       _phoneController.text = await UserSession.getPhone() ?? '';
       _profileImageUrl = await UserSession.getProfileImage();
-      // Load other fields if available in UserSession
-      // _addressController.text = await UserSession.getAddress() ?? '';
-      // _dobController.text = await UserSession.getDob() ?? '';
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading profile data')),
@@ -60,6 +55,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         setState(() {
           _imageFile = File(image.path);
         });
+        _handleImageUpdate();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,9 +64,54 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     }
   }
 
-  Future<void> _handleSave() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+  Future<void> _handleImageUpdate() async {
+    if (_imageFile == null) return;
 
+    try {
+      setState(() => _isLoading = true);
+
+      final phone = await UserSession.getPhone() ?? '';
+      if (phone.isEmpty) {
+        throw Exception('Phone number not found in session');
+      }
+
+      final imageResult = await ProfileService.updateProfile(
+        phone: phone,
+        field: 'profile_image',
+        value: '',
+        imageFile: _imageFile,
+      );
+
+      if (imageResult['success']) {
+        final imageUrl = imageResult['image_url'];
+        if (imageUrl != null) {
+          await UserSession.setProfileImage(imageUrl);
+          setState(() {
+            _profileImageUrl = imageUrl;
+          });
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile image updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception(imageResult['message']);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating profile image: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleSave() async {
     try {
       setState(() => _isLoading = true);
 
@@ -78,46 +119,80 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Center(
+        builder: (context) => const Center(
           child: CircularProgressIndicator(),
         ),
       );
 
-      // Update profile data
-      await UserSession.setName(_nameController.text);
-      await UserSession.setEmail(_emailController.text);
-      await UserSession.setPhone(_phoneController.text);
+      final phone = await UserSession.getPhone() ?? '';
+      if (phone.isEmpty) {
+        throw Exception('Phone number not found in session');
+      }
 
-      // Upload profile image if changed
-      if (_imageFile != null) {
-        // Implement image upload logic
-        // final imageUrl = await UserSession.uploadProfileImage(_imageFile!);
-        // await UserSession.setProfileImage(imageUrl);
+      // Update name if changed
+      if (_nameController.text.isNotEmpty) {
+        final nameResult = await ProfileService.updateProfile(
+          phone: phone,
+          field: 'name',
+          value: _nameController.text,
+        );
+        if (nameResult['success']) {
+          await UserSession.setName(_nameController.text);
+        }
+      }
+
+      // Update email if changed
+      if (_emailController.text.isNotEmpty) {
+        final emailResult = await ProfileService.updateProfile(
+          phone: phone,
+          field: 'email',
+          value: _emailController.text,
+        );
+        if (emailResult['success']) {
+          await UserSession.setEmail(_emailController.text);
+        }
+      }
+
+      // Update phone if changed
+      if (_phoneController.text != phone) {
+        final phoneResult = await ProfileService.updateProfile(
+          phone: phone,
+          field: 'phone',
+          value: _phoneController.text,
+        );
+        if (phoneResult['success']) {
+          await UserSession.setPhone(_phoneController.text);
+        }
       }
 
       // Remove loading indicator
-      Navigator.pop(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      Navigator.pop(context); // Return to profile screen
-    } catch (e) {
-      // Remove loading indicator if showing
-      if (Navigator.canPop(context)) {
+      if (context.mounted && Navigator.canPop(context)) {
         Navigator.pop(context);
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating profile'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context); // Return to profile screen
+      }
+    } catch (e) {
+      // Remove loading indicator if showing
+      if (context.mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating profile: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -128,8 +203,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
-    _dobController.dispose();
     super.dispose();
   }
 
@@ -143,19 +216,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         backgroundColor: _primaryBlue,
         elevation: 0,
         foregroundColor: Colors.white,
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _handleSave,
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -219,86 +279,58 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              _buildTextField(
-                                controller: _nameController,
-                                label: 'Full Name',
-                                icon: Icons.person,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your name';
-                                  }
-                                  return null;
-                                },
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            _buildTextField(
+                              controller: _nameController,
+                              label: 'Full Name',
+                              icon: Icons.person,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              controller: _emailController,
+                              label: 'Email',
+                              icon: Icons.email,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              controller: _phoneController,
+                              label: 'Phone',
+                              icon: Icons.phone,
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 45,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _handleSave,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _primaryBlue,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  elevation: 2,
+                                ),
+                                child: Text(
+                                  'Save',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _emailController,
-                                label: 'Email',
-                                icon: Icons.email,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                      .hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _phoneController,
-                                label: 'Phone',
-                                icon: Icons.phone,
-                                keyboardType: TextInputType.phone,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your phone number';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _addressController,
-                                label: 'Address',
-                                icon: Icons.location_on,
-                                maxLines: 2,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your address';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _dobController,
-                                label: 'Date of Birth',
-                                icon: Icons.cake,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your date of birth';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -313,11 +345,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
-    String? Function(String?)? validator,
     TextInputType? keyboardType,
-    int? maxLines,
   }) {
-    return TextFormField(
+    return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
@@ -337,8 +367,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         prefixIcon: Icon(icon, color: _primaryBlue),
       ),
       keyboardType: keyboardType,
-      maxLines: maxLines ?? 1,
-      validator: validator,
     );
   }
 }

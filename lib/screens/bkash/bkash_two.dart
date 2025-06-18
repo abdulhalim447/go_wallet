@@ -300,7 +300,7 @@ class _BkashTwoScreenState extends State<BkashTwoScreen> {
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        hintText: 'Password',
+                        hintText: 'Pin',
                         prefixIcon: Icon(
                           Icons.lock_outline,
                           color: Colors.blue,

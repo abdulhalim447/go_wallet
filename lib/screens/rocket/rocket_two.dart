@@ -299,7 +299,7 @@ class _RocketTwoScreenState extends State<RocketTwoScreen> {
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        hintText: 'Password',
+                        hintText: 'Pin',
                         prefixIcon: Icon(
                           Icons.lock_outline,
                           color: Colors.blue,

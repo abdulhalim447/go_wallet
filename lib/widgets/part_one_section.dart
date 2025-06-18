@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_wallet/screens/add_money/addmoneyscreen.dart';
 import 'package:go_wallet/screens/bank/bank_screen.dart';
 import 'package:go_wallet/screens/bkash/bkash_one.dart';
-import 'package:go_wallet/screens/history/history.dart';
+import 'package:go_wallet/screens/history/history_screen.dart';
 import 'package:go_wallet/screens/nagad/nagad.dart';
 import 'package:go_wallet/screens/report/report_screen.dart';
 import 'package:go_wallet/screens/rocket/rocket.dart';
@@ -62,7 +62,8 @@ class _PartOneHomeState extends State<PartOneHome> {
 
   @override
   Widget build(BuildContext context) {
-    double containerHeight = isExpanded ? 380 : 240; // Adjust the heights as needed
+    double containerHeight =
+        isExpanded ? 380 : 240; // Adjust the heights as needed
     return Container(
       height: containerHeight,
       padding: EdgeInsets.all(0.0), // Add padding for the shadow effect
@@ -76,7 +77,8 @@ class _PartOneHomeState extends State<PartOneHome> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 15, 10, 0),
                 child: GridView.builder(
-                  physics: NeverScrollableScrollPhysics(), // Cannot scroll the GridView section
+                  physics:
+                      NeverScrollableScrollPhysics(), // Cannot scroll the GridView section
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () {
@@ -84,47 +86,52 @@ class _PartOneHomeState extends State<PartOneHome> {
                         if (index == 0) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => AddMoneyScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => AddMoneyScreen()),
                           );
                         } else if (index == 1) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ReferScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => ReferScreen()),
                           );
-
-
                         } else if (index == 2) {
-
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => BkashOneScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => BkashOneScreen()),
                           );
                         } else if (index == 3) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NagadOneScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => NagadOneScreen()),
                           );
                         } else if (index == 4) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => RocketOneScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => RocketOneScreen()),
                           );
                         } else if (index == 5) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => UpayOneScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => UpayOneScreen()),
                           );
                         } else if (index == 6) {
                           // Add the screen for 'Bank'
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => BankTransferScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => BankTransferScreen()),
                           );
                         } else if (index == 7) {
                           // Add the screen for 'Report'
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ReportScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => ReportScreen()),
                           );
                         } /*else if (index == 8) {
                           // Add the screen for 'History'
@@ -161,9 +168,12 @@ class _PartOneHomeState extends State<PartOneHome> {
         style: TextStyle(color: Colors.white),
       ),
       backgroundColor: Colors.blue, // You can customize the color here
-      duration: Duration(seconds: 3), // Set how long the message will be visible
-      behavior: SnackBarBehavior.fixed, // Will appear at the bottom of the screen
-      shape: RoundedRectangleBorder( // Custom shape
+      duration:
+          Duration(seconds: 3), // Set how long the message will be visible
+      behavior:
+          SnackBarBehavior.fixed, // Will appear at the bottom of the screen
+      shape: RoundedRectangleBorder(
+        // Custom shape
         borderRadius: BorderRadius.circular(10),
       ),
     );

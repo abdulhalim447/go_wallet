@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_wallet/models/notice.dart';
 import 'package:go_wallet/services/notice_service.dart';
-import 'package:go_wallet/screens/notice/notice_detail_screen.dart';
 
 class MyBkashWidget extends StatefulWidget {
   const MyBkashWidget({Key? key}) : super(key: key);
@@ -11,21 +10,21 @@ class MyBkashWidget extends StatefulWidget {
 }
 
 class _MyBkashWidgetState extends State<MyBkashWidget> {
-  List<Notice> _notices = [];
+  Notice? _latestNotice;
   bool _isLoading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _loadNotices();
+    _loadLatestNotice();
   }
 
-  Future<void> _loadNotices() async {
+  Future<void> _loadLatestNotice() async {
     try {
       final notices = await NoticeService.getNotices();
       setState(() {
-        _notices = notices;
+        _latestNotice = notices.isNotEmpty ? notices.first : null;
         _isLoading = false;
       });
     } catch (e) {
@@ -36,105 +35,135 @@ class _MyBkashWidgetState extends State<MyBkashWidget> {
     }
   }
 
-  void _showNoticeDetail(Notice notice) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NoticeDetailScreen(notice: notice),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue[50]!,
+            Colors.blue[100]!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // Notice Header
           Container(
-            padding: EdgeInsets.all(5),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(width: 0.2, color: Colors.grey),
+              color: Colors.blue[600],
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Icon(
+                  Icons.campaign_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
                 Text(
                   'Notice',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                if (_notices.isNotEmpty)
-                  Text(
-                    '${_notices.length} Updates',
-                    style: TextStyle(
-                      color: Colors.pink,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
+                ),
               ],
             ),
           ),
+          // Notice Content
           Container(
-            padding: EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              border: Border.all(width: 0.2, color: Colors.grey),
-            ),
-            height: 85,
-            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.all(20),
             child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  )
                 : _error != null
-                    ? Center(child: Text(_error!))
-                    : _notices.isEmpty
-                        ? Center(child: Text('No notices available'))
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _notices.length,
-                            itemBuilder: (context, index) {
-                              final notice = _notices[index];
-                              return GestureDetector(
-                                onTap: () => _showNoticeDetail(notice),
-                                child: Container(
-                                  width: 200,
-                                  margin: EdgeInsets.symmetric(horizontal: 4),
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.2),
-                                        spreadRadius: 1,
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        notice.title,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        notice.notice,
-                                        style: TextStyle(fontSize: 10),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
+                    ? Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red[400],
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _error!,
+                              style: TextStyle(
+                                color: Colors.red[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : _latestNotice == null
+                        ? Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.grey[600],
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'No notices available',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
                                 ),
-                              );
-                            },
+                              ),
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _latestNotice!.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[900],
+                                  height: 1.3,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                _latestNotice!.notice,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue[800],
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
                           ),
           ),
         ],

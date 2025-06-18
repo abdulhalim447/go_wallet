@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_wallet/auth/login.dart';
 import 'package:go_wallet/screens/profile/profile_editScreen.dart';
 import 'package:go_wallet/models/user_session.dart';
 
@@ -204,7 +205,12 @@ class ProfileScreen extends StatelessWidget {
         Navigator.pop(context);
 
         // Navigate to login screen and clear all routes
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Login()),
+              (route) => false,
+        );
+
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
