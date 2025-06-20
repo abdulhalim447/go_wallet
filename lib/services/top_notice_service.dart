@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:go_wallet/models/top_notice.dart';
+import 'dart:convert';
+import '../config/api_endpoints.dart';
+import '../models/top_notice.dart';
 
 class TopNoticeService {
-  static const String _baseUrl = 'https://gowalletapp.com/php/top_notice.php';
+  static final String _baseUrl = ApiEndpoints.topNotice;
 
   static Future<TopNotice?> getTopNotice() async {
     try {

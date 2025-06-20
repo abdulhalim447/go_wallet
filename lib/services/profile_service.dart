@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'dart:io';
+import '../config/api_endpoints.dart';
 
 class ProfileService {
-  static const String _baseUrl =
-      'https://gowalletapp.com/php/update_profile.php';
+  static final String _baseUrl = ApiEndpoints.updateProfile;
 
   static Future<Map<String, dynamic>> updateProfile({
     required String phone,

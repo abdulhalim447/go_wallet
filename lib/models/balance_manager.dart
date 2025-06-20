@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:go_wallet/config/api_endpoints.dart';
 import 'package:go_wallet/models/user_session.dart';
 
 class BalanceManager {
@@ -28,7 +29,7 @@ class BalanceManager {
     try {
       final userId = await UserSession.getUserId();
       final response = await http.post(
-        Uri.parse('https://gowalletapp.com/php/get_u_balance.php'),
+        Uri.parse(ApiEndpoints.getBalance),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

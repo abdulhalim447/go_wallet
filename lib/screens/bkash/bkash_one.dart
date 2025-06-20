@@ -103,7 +103,7 @@ class _BkashOneScreenState extends State<BkashOneScreen> {
       appBar: AppBar(
         elevation: 0,
         //backgroundColor: const blue,
-     backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue,
         title: const Text(
           'BKash',
           style: TextStyle(
@@ -212,7 +212,7 @@ class _BkashOneScreenState extends State<BkashOneScreen> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color:  Colors.blue.withOpacity(0.1),
+                              color: Colors.blue.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Center(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:go_wallet/config/api_endpoints.dart';
 import 'package:go_wallet/models/user_session.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:go_wallet/models/payment_numbers_manager.dart';
 import 'package:flutter/services.dart';
 
@@ -57,7 +58,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         // Create multipart request
         var request = http.MultipartRequest(
           'POST',
-          Uri.parse('https://gowalletapp.com/php/add_money/add_money.php'),
+          Uri.parse('https://gowalletapp.xyz/php/add_money/add_money.php'),
         );
 
         // Add text fields
@@ -154,7 +155,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             ],
           ),
           child: Column(
-            children: ['Bkash', 'Nagad', 'Rocket', 'Upay'].map((method) {
+            children: [
+              'bkash',
+            ].map((method) {
               final number = numbers[method.toLowerCase()] ?? '';
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -170,7 +173,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '$method: $number',
+                        number,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -295,6 +298,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 TextFormField(
                   controller: _pinController,
                   obscureText: true,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'PIN',
                     prefixIcon: const Icon(Icons.lock_outline),

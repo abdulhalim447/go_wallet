@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:go_wallet/models/history.dart';
+import 'dart:convert';
+import '../config/api_endpoints.dart';
+import '../models/history.dart';
 
 class HistoryService {
-  static const String _baseUrl = 'https://gowalletapp.com/php/history.php';
+  static final String _baseUrl = ApiEndpoints.history;
 
   static Future<List<History>> getHistory(String userId) async {
     try {

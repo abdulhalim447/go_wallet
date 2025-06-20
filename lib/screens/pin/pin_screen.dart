@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_wallet/config/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:go_wallet/models/user_session.dart';
@@ -28,7 +29,7 @@ class _PinScreenState extends State<PinScreen> {
       final userId = await UserSession.getUserId();
 
       final response = await http.post(
-        Uri.parse('https://gowalletapp.com/php/pin.php'),
+        Uri.parse(ApiEndpoints.pin),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

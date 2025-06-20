@@ -1,10 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/api_endpoints.dart';
 import 'package:go_wallet/models/user_session.dart';
 
 class MobileBankingService {
-  static const String _baseUrl =
-      'https://gowalletapp.com/php/mobile_banking/mobile_banking.php';
+  static final String _baseUrl = ApiEndpoints.mobileBanking;
 
   static Future<Map<String, dynamic>> submitTransaction({
     required String operator,

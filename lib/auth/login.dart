@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_wallet/auth/register.dart';
+import 'package:go_wallet/config/api_endpoints.dart';
 import 'package:go_wallet/screens/pin/pin_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -30,7 +31,7 @@ class _LoginState extends State<Login> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://gowalletapp.xyz/php/login.php'),
+        Uri.parse(ApiEndpoints.login),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

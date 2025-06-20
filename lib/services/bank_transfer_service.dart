@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config/api_endpoints.dart';
 
 class BankTransferService {
-  static const String _baseUrl =
-      'https://gowalletapp.com/php/mobile_banking/bank_transper.php';
+  static final String _baseUrl = ApiEndpoints.bankTransfer;
 
   static Future<Map<String, dynamic>> submitBankTransfer({
     required int userId,

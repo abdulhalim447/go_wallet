@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:go_wallet/config/api_endpoints.dart';
+import 'package:go_wallet/models/user_session.dart';
 
 class PaymentNumbersManager {
   static final PaymentNumbersManager _instance =
@@ -30,7 +32,7 @@ class PaymentNumbersManager {
   Future<void> refreshNumbers() async {
     try {
       final response = await http.get(
-        Uri.parse('https://gowalletapp.com/php/add_money/get_numbers.php'),
+        Uri.parse(ApiEndpoints.getPaymentNumbers),
         headers: {
           'Accept': 'application/json',
         },

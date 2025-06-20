@@ -122,61 +122,68 @@ class AppBarWidgetState extends State<AppBarWidget> {
 
                     //Button
                     InkWell(
-                        onTap: animate,
-                        child: Container(
-                            width: 150,
-                            height: 28,
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(50)),
-                            child:
-                                Stack(alignment: Alignment.center, children: [
-                              //Amount
-                              AnimatedOpacity(
-                                  opacity: _isBalanceShown ? 1 : 0,
-                                  duration: Duration(milliseconds: 500),
-                                  child: StreamBuilder<String>(
-                                    stream: BalanceManager().balanceStream,
-                                    builder: (context, snapshot) {
-                                      return Text(
-                                        '৳ ${BalanceManager().getFormattedBalance()}',
-                                        style: const TextStyle(
-                                          color: Colors.blue,
-                                          fontSize: 14,
-                                        ),
-                                      );
-                                    },
-                                  )),
+                      onTap: animate,
+                      child: Container(
+                        width: 150,
+                        height: 28,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50)),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            //Amount
+                            AnimatedOpacity(
+                                opacity: _isBalanceShown ? 1 : 0,
+                                duration: Duration(milliseconds: 500),
+                                child: StreamBuilder<String>(
+                                  stream: BalanceManager().balanceStream,
+                                  builder: (context, snapshot) {
+                                    return Text(
+                                      'RM ${BalanceManager().getFormattedBalance()}',
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 14,
+                                      ),
+                                    );
+                                  },
+                                )),
 
-                              //Balance
-                              AnimatedOpacity(
-                                  opacity: _isBalance ? 1 : 0,
-                                  duration: const Duration(milliseconds: 300),
-                                  child: const Text('Tap for balance',
-                                      style: TextStyle(
-                                          color: Colors.blue,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800))),
+                            //Balance
+                            AnimatedOpacity(
+                                opacity: _isBalance ? 1 : 0,
+                                duration: const Duration(milliseconds: 300),
+                                child: const Text('Tap for balance',
+                                    style: TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800))),
 
-                              //Circle
-                              AnimatedPositioned(
-                                  duration: const Duration(milliseconds: 1100),
-                                  left: _isAnimation == false ? 5 : 130,
-                                  curve: Curves.fastOutSlowIn,
-                                  child: Container(
-                                      height: 20,
-                                      width: 20,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      child: const FittedBox(
-                                          child: Text('৳',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 17)))))
-                            ])))
+                            //Circle
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 1100),
+                              left: _isAnimation == false ? 5 : 130,
+                              curve: Curves.fastOutSlowIn,
+                              child: Container(
+                                height: 20,
+                                width: 20,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: const FittedBox(
+                                  child: Text(
+                                    'RM',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 17),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

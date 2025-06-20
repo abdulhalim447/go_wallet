@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_wallet/auth/login.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:go_wallet/config/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class Registration extends StatefulWidget {
   const Registration({super.key});
@@ -76,11 +77,18 @@ class _RegistrationState extends State<Registration> {
     }
 
     try {
-      var response = await request.send();
-      var responseData = await response.stream.bytesToString();
-      var cleanedResponse =
+      final response = await http.post(
+        Uri.parse(ApiEndpoints.register),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: request.fields,
+      );
+
+      final responseData = response.body;
+      final cleanedResponse =
           responseData.replaceFirst('Connected successfully', '');
-      var jsonResponse = json.decode(cleanedResponse);
+      final jsonResponse = json.decode(cleanedResponse);
 
       if (jsonResponse['status'] == 'success') {
         if (!mounted) return;

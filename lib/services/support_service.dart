@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SupportService {
-  static const String _baseUrl = 'https://gowalletapp.com/php/support.php';
+  static const String _baseUrl = 'https://gowalletapp.xyz/php/support.php';
 
   static Future<Map<String, dynamic>> submitSupportRequest({
     required int userId,

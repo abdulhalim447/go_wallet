@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_wallet/models/user_session.dart';
 import 'package:go_wallet/services/bank_transfer_service.dart';
+import 'package:go_wallet/services/ringit_api_call.dart';
 
 class BankTransferScreen extends StatefulWidget {
   const BankTransferScreen({super.key});
@@ -18,6 +19,35 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
   final TextEditingController _accountNumberController =
       TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+
+  double _calculatedValue = 0;
+  Stream<String>? _ringitStream;
+  String _ringitValue = '0';
+
+  @override
+  void initState() {
+    super.initState();
+    _ringitStream = RingitService().ringitStream;
+    // Listen to amount changes
+    _amountController.addListener(_updateCalculation);
+    // Listen to ringit value changes
+    _ringitStream?.listen((value) {
+      setState(() {
+        _ringitValue = value;
+        _updateCalculation();
+      });
+    });
+    // Fetch ringit value if not already fetched
+    RingitService().fetchRingitValue();
+  }
+
+  void _updateCalculation() {
+    final amount = double.tryParse(_amountController.text) ?? 0;
+    final ringit = double.tryParse(_ringitValue) ?? 0;
+    setState(() {
+      _calculatedValue = amount * ringit;
+    });
+  }
 
   final List<String> banks = [
     'City Bank',
@@ -269,6 +299,19 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
                             }
                             return null;
                           },
+                        ),
+
+                        // Real-time calculation display
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                          child: Text(
+                            '${_calculatedValue.toStringAsFixed(2)} BDT',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
